@@ -6,9 +6,11 @@ const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
 
 const client = redis.createClient({
-    host: 'promisestat.redis.cache.windows.net:6380,password=DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE=,ssl=True,abortConnect=False',
-    port: 6380,
-    password: 'DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE',
+  host: 'promisestat.redis.cache.windows.net',
+  port: 6380,
+  password: 'DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE',
+  tls: {
+      rejectUnauthorized: false,
 });
 
 client.on('error', (err) => {
