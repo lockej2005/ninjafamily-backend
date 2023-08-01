@@ -10,9 +10,9 @@ const client = redis.createClient({
   port: 6380,
   password: 'DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE',
   tls: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: false
+  }
 });
-
 client.on('error', (err) => {
     console.log('Redis error: ', err);
 });
