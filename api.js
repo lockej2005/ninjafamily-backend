@@ -4,7 +4,7 @@ const db = require('./database');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
-
+//test
 const client = redis.createClient({
   host: 'promisestat.redis.cache.windows.net',
   port: 6380,
