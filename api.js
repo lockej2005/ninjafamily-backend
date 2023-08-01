@@ -32,7 +32,7 @@ router.use(session({
   store: new RedisStore({ client: client }),
   secret: 'Your_Secret_Key',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false
 }));
 
 router.post('/login', async (req, res) => {
@@ -56,8 +56,9 @@ router.get('/get-promises', checkAuthenticated, async (req, res) => {
   }
 });
 
-router.post('/add-promise', async (req, res) => {
-  const { promise, recusername, senusername, sentAt } = req.body;
+router.post('/add-promise', checkAuthenticated, async (req, res) => {
+  const { promise, recusername, sentAt } = req.body;
+  const senusername = req.session.username;
   const status = 'active';
 
   try {
@@ -68,7 +69,7 @@ router.post('/add-promise', async (req, res) => {
   }
 });
 
-router.put('/update-promise/:id', async (req, res) => {
+router.put('/update-promise/:id', checkAuthenticated, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
