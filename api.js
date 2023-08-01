@@ -2,8 +2,22 @@ const express = require('express');
 const router = express.Router();
 const db = require('./database');
 const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const redis = require('redis');
+require('dotenv').config();
+
+const client = redis.createClient({
+    host: 'promisestat.redis.cache.windows.net:6380,password=DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE=,ssl=True,abortConnect=False',
+    port: 6380,
+    password: 'DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE',
+});
+
+client.on('error', (err) => {
+    console.log('Redis error: ', err);
+});
 
 router.use(session({
+  store: new RedisStore({ client: client }),
   secret: 'Your_Secret_Key',
   resave: false,
   saveUninitialized: true
