@@ -27,6 +27,13 @@ jobs:
           npm run build --if-present
           npm run test --if-present
       
+      # Zip the build directory
+      - name: Zip Release
+        uses: TheDoctor0/zip-release@0.6.1
+        with:
+          filename: release.zip
+          path: .
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
@@ -53,4 +60,4 @@ jobs:
           app-name: 'promisestatbackend'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_91E2A74FB3614991BC2BEB655AA85F40 }}
-          package: .
+          package: release.zip
