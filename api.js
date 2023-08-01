@@ -4,7 +4,7 @@ const db = require('./database');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const redis = require('redis');
-//test
+
 const client = redis.createClient({
   host: 'promisestat.redis.cache.windows.net',
   port: 6380,
@@ -13,9 +13,20 @@ const client = redis.createClient({
       rejectUnauthorized: false
   }
 });
+
 client.on('error', (err) => {
     console.log('Redis error: ', err);
 });
+
+// Middleware to check if a user is authenticated
+function checkAuthenticated(req, res, next) {
+    if (req.session && req.session.username) {
+        next();
+    } else {
+        // User is not authenticated, respond with 401 status
+        res.status(401).json({ message: 'User not logged in.' });
+    }
+}
 
 router.use(session({
   store: new RedisStore({ client: client }),
@@ -35,11 +46,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/get-promises', async (req, res) => {
+router.get('/get-promises', checkAuthenticated, async (req, res) => {
   const senusername = req.session.username;
-  if (!senusername) {
-    return res.status(401).json({ message: 'User not logged in.' });
-  }
   try {
     const promises = await db.getAllPromises(senusername); // pass senusername as parameter
     return res.status(200).json(promises);
