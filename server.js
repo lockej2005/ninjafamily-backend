@@ -16,7 +16,8 @@ app.use(cors({
 app.use('/api', apiRouter);
 
 // Start the server
-const port = process.env.PORT || 6000;
+const port = process.env.PORT || 3000; // Use any default port you prefer (e.g., 3000)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}.`);
 });
+
