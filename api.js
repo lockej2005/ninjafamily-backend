@@ -2,12 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('./database');
 const session = require('express-session');
-
-//blah blah
-
 const redis = require('redis');
-const RedisStore = require('connect-redis')(session);
+let RedisStore = null;
 
+// Redis client configuration
 const client = redis.createClient({
   host: 'promisestat.redis.cache.windows.net',
   port: 6380,
@@ -31,12 +29,19 @@ function checkAuthenticated(req, res, next) {
     }
 }
 
-router.use(session({
-  store: new RedisStore({ client: client }),
-  secret: 'Your_Secret_Key',
-  resave: false,
-  saveUninitialized: false
-}));
+// Setup session middleware
+router.use((req, res, next) => {
+    if(req.session){
+        RedisStore = require('connect-redis')(session);
+    }
+    
+    session({
+        store: RedisStore ? new RedisStore({ client: client }) : undefined,
+        secret: 'Your_Secret_Key',
+        resave: false,
+        saveUninitialized: false
+    })(req, res, next);
+});
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
