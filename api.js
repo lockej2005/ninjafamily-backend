@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('./database');
 const session = require('express-session');
 const redis = require('redis');
-let RedisStore = require('connect-redis')(session);
+let RedisStore = null;
 
 // Redis client configuration
 const client = redis.createClient({
@@ -29,13 +29,15 @@ function checkAuthenticated(req, res, next) {
     }
 }
 
-// Setup session middleware
+RedisStore = require('connect-redis')(session);
+
 router.use(session({
     store: new RedisStore({ client: client }),
     secret: 'Your_Secret_Key',
     resave: false,
     saveUninitialized: false
 }));
+
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
