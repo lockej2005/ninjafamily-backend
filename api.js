@@ -31,7 +31,7 @@ function checkAuthenticated(req, res, next) {
 
 // Setup session middleware
 router.use((req, res, next) => {
-    if(req.session){
+    if (req.session) {
         RedisStore = require('connect-redis')(session);
     }
     
