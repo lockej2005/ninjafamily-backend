@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('./database');
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+
+//blah blah
+
 const redis = require('redis');
+const RedisStore = require('connect-redis')(session);
 
 const client = redis.createClient({
   host: 'promisestat.redis.cache.windows.net',
