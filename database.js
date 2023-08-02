@@ -9,6 +9,12 @@ const config = {
     encrypt: true,
   },
 };
+const connectionPool = new sql.ConnectionPool(config).connect()
+  .then(pool => {
+    console.log('Connected to MSSQL')
+    return pool
+  })
+  .catch(err => console.log('Database Connection Failed! ', err));
 const getAllPromises = async (senusername) => {
   try {
     const pool = await connectionPool;
@@ -45,12 +51,7 @@ const getUser = async (username, password) => {
 };
 
 
-const connectionPool = new sql.ConnectionPool(config).connect()
-  .then(pool => {
-    console.log('Connected to MSSQL')
-    return pool
-  })
-  .catch(err => console.log('Database Connection Failed! ', err));
+
 
 const addPromise = async (promise, status, recusername, senusername, sentAt) => {
   try {
