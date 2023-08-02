@@ -29,15 +29,19 @@ function checkAuthenticated(req, res, next) {
     }
 }
 
-RedisStore = require('connect-redis')(session);
-
-router.use(session({
-    store: new RedisStore({ client: client }),
-    secret: 'Your_Secret_Key',
-    resave: false,
-    saveUninitialized: false
-}));
-
+// Setup session middleware
+router.use((req, res, next) => {
+    if(req.session){
+        RedisStore = require('connect-redis')(session);
+    }
+    
+    session({
+        store: RedisStore ? new RedisStore({ client: client }) : undefined,
+        secret: 'Your_Secret_Key',
+        resave: false,
+        saveUninitialized: false
+    })(req, res, next);
+});
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
