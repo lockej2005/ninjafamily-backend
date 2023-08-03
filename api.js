@@ -7,8 +7,7 @@ const RedisStore = require('connect-redis')(session);
 
 // Redis client configuration
 const client = redis.createClient({
-  host: 'promisestat.redis.cache.windows.net',
-  port: 6380,
+  url: 'redis://promisestat.redis.cache.windows.net:6380',
   password: 'DTUTjdPPtjjFoVbrq0XLG2fqvgiCIpA8yAzCaED90XE',
   tls: {
       rejectUnauthorized: false
