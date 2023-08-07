@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const redisUrl = process.env.REDIS_URL;
 const redisKey = process.env.REDIS_ACCESS_KEY;
-console.log('n')
+
 
 
 
