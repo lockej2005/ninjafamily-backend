@@ -4,7 +4,6 @@ const dbUser = process.env.DB_USERNAME;
 const dbPass = process.env.DB_PASSWORD;
 const dbUrl = process.env.DB_URL;
 
-
 const config = {
     user: dbUser,
     password: dbPass,
@@ -25,16 +24,12 @@ const connectionPool = new sql.ConnectionPool(config).connect()
     .catch(err => console.log('Database Connection Failed! ', err));
 
 const getUser = async (username, password) => {
-    console.log(`Fetching user with username: ${username} from DB...`);
     try {
         const pool = await connectionPool;
         const result = await pool.request()
             .input('username', sql.NVarChar, username)
             .query('SELECT * FROM users WHERE username = @username');
         const user = result.recordset[0];
-
-        console.log("Fetched user:", user);
-
         if (user && password === user.password) {
             delete user.password;
             return user;
@@ -48,7 +43,6 @@ const getUser = async (username, password) => {
 };
 
 const getAllPromises = async (senusername) => {
-    console.log(`Fetching all promises for user: ${senusername} from DB...`);
     try {
         const pool = await connectionPool;
         const result = await pool.request()
@@ -61,7 +55,6 @@ const getAllPromises = async (senusername) => {
 };
 
 const addPromise = async (promise, status, recusername, senusername, sentAt) => {
-    console.log('Inserting promise into DB...');
     try {
         const pool = await connectionPool;
         const result = await pool.request()
@@ -78,7 +71,6 @@ const addPromise = async (promise, status, recusername, senusername, sentAt) => 
 };
 
 const addUser = async (username, password, email) => {
-    console.log(`Adding new user with username: ${username} to DB...`);
     try {
         const pool = await connectionPool;
         const result = await pool.request()
@@ -93,7 +85,6 @@ const addUser = async (username, password, email) => {
 };
 
 const updatePromiseStatus = async (id, status) => {
-    console.log(`Updating promise with id: ${id} in DB...`);
     try {
         const pool = await connectionPool;
         const result = await pool.request()
@@ -105,11 +96,55 @@ const updatePromiseStatus = async (id, status) => {
         console.log('Error running the query!', err);
     }
 };
+const getReceivedPromises = async (recusername) => {
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('recusername', sql.NVarChar, recusername)
+            .query('SELECT * FROM promises WHERE recusername = @recusername');
+        return result.recordset;
+    } catch (err) {
+        console.log('Error running the query!', err);
+        return [];
+    }
+};
+const searchUsers = async (searchTerm) => {
+    const searchQuery = `%${searchTerm}%`;
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('searchQuery', sql.NVarChar, searchQuery)
+            .query('SELECT username, promise_score FROM users WHERE username LIKE @searchQuery');
+        return result.recordset;
+    } catch (err) {
+        console.log('Error running the searchUsers query!', err);
+        return [];
+    }
+};
+
+const getUserSuggestions = async (query) => {
+    const queryString = `%${query}%`;
+    console.log(queryString);
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('query', sql.NVarChar, queryString)
+            .query('SELECT username FROM users WHERE username LIKE @query');
+            
+        return result.recordset.map(row => row.username);
+    } catch (err) {
+        console.log('Error running the query!', err);
+        return [];
+    }
+};
 
 module.exports = {
     getUser,
     getAllPromises,
     addPromise,
     addUser,
-    updatePromiseStatus
+    updatePromiseStatus,
+    getUserSuggestions,
+    getReceivedPromises,
+    searchUsers
 };

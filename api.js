@@ -9,10 +9,6 @@ require('dotenv').config();
 const redisUrl = process.env.REDIS_URL;
 const redisKey = process.env.REDIS_ACCESS_KEY;
 
-
-
-
-// Redis client configuration
 const client = redis.createClient({
     legacyMode: true,
     url: redisUrl, 
@@ -32,21 +28,18 @@ client.on('error', (err) => {
     console.log('Redis Client Error: ', err);
 });
 
-console.log('Connecting to Redis...');
 client.connect()
     .then(() => console.log("Connected to Redis"))
     .catch(err => console.log('Redis connect error: ', err));
 
 function checkAuthenticated(req, res, next) {
-    console.log('Entering checkAuthenticated middleware...');
     if (req.session && req.session.username) {
-        console.log('User authenticated');
         next();
     } else {
         res.status(401).json({ message: 'User not logged in.' });
     }
 }
-console.log('api.js test 1')
+
 router.use(session({
     store: new RedisStore({ client: client }),
     secret: redisKey,
@@ -55,7 +48,6 @@ router.use(session({
 }));
 
 router.post('/login', async (req, res) => {
-    console.log('Handling /login POST request...');
     const { username, password } = req.body;
 
     if (typeof username !== 'string' || typeof password !== 'string') {
@@ -65,7 +57,6 @@ router.post('/login', async (req, res) => {
     const user = await db.getUser(username, password);
     if (user) {
         req.session.username = username;
-        console.log(req.session);
         res.status(200).json({ message: 'User logged in successfully.' });
     } else {
         res.status(401).json({ message: 'Invalid username or password.' });
@@ -73,7 +64,6 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/get-promises', checkAuthenticated, async (req, res) => {
-    console.log('Handling /get-promises GET request...');
     const senusername = req.session.username;
     try {
         const promises = await db.getAllPromises(senusername);
@@ -84,7 +74,6 @@ router.get('/get-promises', checkAuthenticated, async (req, res) => {
 });
 
 router.post('/add-promise', checkAuthenticated, async (req, res) => {
-    console.log('Handling /add-promise POST request...');
     const { promise, recusername, sentAt } = req.body;
     const senusername = req.session.username;
     const status = 'active';
@@ -97,8 +86,23 @@ router.post('/add-promise', checkAuthenticated, async (req, res) => {
     }
 });
 
+router.get('/search-users', checkAuthenticated, async (req, res) => {
+    const { searchTerm } = req.query;
+
+    if (!searchTerm) {
+        return res.status(400).json({ error: 'Query parameter "searchTerm" is required.' });
+    }
+
+    try {
+        const users = await db.searchUsers(searchTerm);
+        return res.status(200).json(users);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error searching users.' });
+    }
+});
+
+
 router.put('/update-promise/:id', checkAuthenticated, async (req, res) => {
-    console.log(`Handling /update-promise/${req.params.id} PUT request...`);
     const { id } = req.params;
     const { status } = req.body;
 
@@ -107,6 +111,31 @@ router.put('/update-promise/:id', checkAuthenticated, async (req, res) => {
         return res.status(200).json({ message: 'Promise status updated successfully.' });
     } catch (err) {
         return res.status(500).json({ error: 'Error updating the promise status.' });
+    }
+});
+
+router.get('/get-received-promises', checkAuthenticated, async (req, res) => {
+    const recusername = req.session.username;
+    try {
+        const promises = await db.getReceivedPromises(recusername);
+        return res.status(200).json(promises);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error retrieving received promises.' });
+    }
+});
+
+router.get('/users/suggestions', checkAuthenticated, async (req, res) => {
+    const { q } = req.query;
+    
+    if (!q) {
+        return res.status(400).json({ error: 'Query parameter "q" is required.' });
+    }
+
+    try {
+        const suggestions = await db.getUserSuggestions(q);
+        return res.status(200).json(suggestions);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error retrieving user suggestions.' });
     }
 });
 
