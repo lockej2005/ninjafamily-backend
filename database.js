@@ -108,6 +108,23 @@ const getReceivedPromises = async (recusername) => {
         return [];
     }
 };
+
+const getUserPromiseScore = async (username) => {
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('username', sql.NVarChar, username)
+            .query('SELECT promise_score FROM users WHERE username = @username');
+        if (result.recordset.length > 0) {
+            return result.recordset[0].promise_score;
+        }
+        return null;
+    } catch (err) {
+        console.log('Error running the getUserPromiseScore query!', err);
+        return null;
+    }
+};
+
 const searchUsers = async (searchTerm) => {
     const searchQuery = `%${searchTerm}%`;
     try {
@@ -119,6 +136,30 @@ const searchUsers = async (searchTerm) => {
     } catch (err) {
         console.log('Error running the searchUsers query!', err);
         return [];
+    }
+};
+const updateUserPromiseScore = async (username, score) => {
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('username', sql.NVarChar, username)
+            .input('score', sql.Float, score)
+            .query('UPDATE users SET promise_score = @score WHERE username = @username');
+        return result.rowsAffected;
+    } catch (err) {
+        console.log('Error updating promise score in database!', err);
+    }
+};
+const getUserProfile = async (username) => {
+    try {
+        const pool = await connectionPool;
+        const result = await pool.request()
+            .input('username', sql.NVarChar, username)
+            .query('SELECT username, promise_score FROM users WHERE username = @username');
+        return result.recordset[0];
+    } catch (err) {
+        console.log('Error running the getUserProfile query!', err);
+        return null;
     }
 };
 
@@ -146,5 +187,8 @@ module.exports = {
     updatePromiseStatus,
     getUserSuggestions,
     getReceivedPromises,
-    searchUsers
+    searchUsers,
+    getUserProfile,
+    getUserPromiseScore,
+    updateUserPromiseScore
 };

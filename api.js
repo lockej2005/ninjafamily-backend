@@ -100,6 +100,17 @@ router.get('/search-users', checkAuthenticated, async (req, res) => {
         return res.status(500).json({ error: 'Error searching users.' });
     }
 });
+router.post('/update-promise-score', checkAuthenticated, async (req, res) => {
+    const { username, score } = req.body;
+    
+    try {
+        await db.updateUserPromiseScore(username, score);
+        return res.status(200).json({ message: 'Promise score updated successfully.' });
+    } catch (err) {
+        return res.status(500).json({ error: 'Error updating promise score.' });
+    }
+});
+
 
 
 router.put('/update-promise/:id', checkAuthenticated, async (req, res) => {
@@ -111,6 +122,34 @@ router.put('/update-promise/:id', checkAuthenticated, async (req, res) => {
         return res.status(200).json({ message: 'Promise status updated successfully.' });
     } catch (err) {
         return res.status(500).json({ error: 'Error updating the promise status.' });
+    }
+});
+
+router.get('/get-promise-score/:username', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const score = await db.getUserPromiseScore(username);
+        if (score !== null) {
+            return res.status(200).json({ promise_score: score });
+        } else {
+            return res.status(404).json({ message: 'User not found or no promise score available.' });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: 'Error retrieving promise score.' });
+    }
+});
+
+router.get('/get-user/:username', async (req, res) => {
+    const { username } = req.params;
+    try {
+        const userProfile = await db.getUserProfile(username);
+        if (userProfile) {
+            return res.status(200).json(userProfile);
+        } else {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+    } catch (err) {
+        return res.status(500).json({ error: 'Error retrieving user profile.' });
     }
 });
 
